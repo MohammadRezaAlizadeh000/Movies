@@ -13,15 +13,17 @@ import com.mra.movies.view.createRateString
 import com.mra.movies.view.loadImage
 
 class HomeThumbnailRecyclerViewAdapter(
-    val onItemClickListener: (MovieEntity?) -> Unit
+    val onItemClickListener: (MovieEntity?) -> Unit,
+    val callNewMovies: (Int?) -> Unit,
 ) : RecyclerView.Adapter<MoviesThumbnailHolder>() {
 
     private val dataList = mutableListOf<MovieEntity?>()
     fun setDate(data: List<MovieEntity?>?) {
         data?.let {
             dataList.apply {
-                clear()
+                val oldSize = size
                 addAll(it)
+                notifyItemRangeInserted(oldSize, size - 1)
             }
         }
     }
@@ -50,11 +52,16 @@ class HomeThumbnailRecyclerViewAdapter(
                 crew.text = model.crew
 
                 dataBackground.setOnClickListener {
-                    crew.visibility = if (crew.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                    crew.visibility =
+                        if (crew.visibility == View.VISIBLE) View.GONE else View.VISIBLE
                 }
 
                 itemView.setOnClickListener { onItemClickListener(model) }
+
+                if (layoutPosition == dataList.size - 1)
+                    callNewMovies.invoke(dataList.size)
             }
+
         }
     }
 

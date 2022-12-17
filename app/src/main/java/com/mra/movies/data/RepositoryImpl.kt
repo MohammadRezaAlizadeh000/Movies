@@ -2,8 +2,10 @@ package com.mra.movies.data
 
 import com.mra.movies.model.MovieEntity
 import com.mra.movies.utils.ResponseState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class RepositoryImpl @Inject constructor(
@@ -16,17 +18,22 @@ class RepositoryImpl @Inject constructor(
         isRefresh: Boolean,
         isOnline: Boolean
     ): Flow<ResponseState<List<MovieEntity>>> = flow {
-        localDataSource.getPopularMovies().collect { localData ->
+        localDataSource.getPopularMovies(startPoint).collect { localData ->
             if (localData.isNotEmpty()) {
                 emit(ResponseState.Success(data = localData))
 
-                when(val remoteData = remoteDataSource.getPopularMovies(isOnline)) {
+//                when (val remoteData = remoteDataSource.getPopularMovies(isOnline)) {
+//                    is ResponseState.Success -> localDataSource.insertPopularMoviesToDB(remoteData.data)
+//                    else -> emit(remoteData)
+//                }
+            } else {
+                when (val remoteData = remoteDataSource.getPopularMovies(isOnline)) {
                     is ResponseState.Success -> localDataSource.insertPopularMoviesToDB(remoteData.data)
                     else -> emit(remoteData)
                 }
             }
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
 //    override suspend fun getSingleMovieData(movieId: String): Flow<ResponseState<MovieEntity>> {
 //        val movieData = withContext(Dispatchers.IO) {

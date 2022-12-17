@@ -9,8 +9,8 @@ class LocalDataSourceImpl @Inject constructor(
     private val moviesDAO: MoviesDAO,
 ): LocalDataSource {
 
-    override suspend fun getPopularMovies(): Flow<List<MovieEntity>> {
-        return moviesDAO.getPopularMovies(1)
+    override suspend fun getPopularMovies(startPoint: Int): Flow<List<MovieEntity>> {
+        return moviesDAO.getPopularMovies(startPoint)
     }
 
     override suspend fun insertPopularMoviesToDB(movies: List<MovieEntity?>?): Boolean {

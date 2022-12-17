@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocalDataSource {
 
-    suspend fun getPopularMovies(): Flow<List<MovieEntity>>
+    suspend fun getPopularMovies(startPoint: Int): Flow<List<MovieEntity>>
 
     suspend fun insertPopularMoviesToDB(movies: List<MovieEntity?>?): Boolean
 }

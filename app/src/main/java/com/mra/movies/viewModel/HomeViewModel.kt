@@ -18,6 +18,10 @@ class HomeViewModel @Inject constructor(
     private val popularMoviesUseCase: GetPopularMoviesUseCase
 ): ViewModel() {
 
+    init {
+        getPopularMovies(0, true)
+    }
+
     data class PopularMoviesData(
         override val errorMessage: String? = null,
         override val page: Int? = null,
@@ -28,15 +32,17 @@ class HomeViewModel @Inject constructor(
     private val _popularMoviesFlow = MutableStateFlow(PopularMoviesData())
     val popularMoviesFlow: StateFlow<PopularMoviesData> = _popularMoviesFlow
 
-    fun getPopularMovies() {
+    fun getPopularMovies(startPoint: Int, isOnline: Boolean) {
         popularMoviesJob = viewModelScope.launch {
-            _popularMoviesFlow.value = when(val response = popularMoviesUseCase()) {
-                is ResponseState.Success -> PopularMoviesData(data = response.data)
-                is ResponseState.Error -> PopularMoviesData(errorMessage = response.message)
-                is ResponseState.Loading -> PopularMoviesData()
-                else -> PopularMoviesData()
+            popularMoviesUseCase(startPoint, isOnline).collect { response ->
+                _popularMoviesFlow.value = when(response) {
+                    is ResponseState.Success -> PopularMoviesData(data = response.data)
+                    is ResponseState.Error -> PopularMoviesData(errorMessage = response.message)
+                    is ResponseState.Loading -> PopularMoviesData()
+                }
             }
         }
+
     }
 
     fun clearPopularMoviesMessageFlow() {
